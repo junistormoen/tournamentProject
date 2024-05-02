@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Text, Popover, Button } from '@mantine/core';
 import tournamentService from './firebase/TournamentService';
-import { toBeRequired } from '@testing-library/jest-dom/matchers';
+import { auth } from './firebase/firebase';
 
 
 export function Games(props) {
@@ -14,7 +14,6 @@ export function Games(props) {
 
     async function getTournament() {
         const tournamentInfo = await tournamentService.getTournament(props.id);
-        const rounds = tournamentInfo.rounds
 
         setTournament(tournamentInfo);
         setRounds(tournamentInfo.rounds)

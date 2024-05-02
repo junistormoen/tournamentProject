@@ -2,6 +2,7 @@ import React, { useState } from "react"
 import { Input, Button } from "@mantine/core"
 import { Games } from "./Games";
 import tournamentService from "./firebase/TournamentService";
+import { auth } from './firebase/firebase';
 
 
 export function NewTournament() {
@@ -36,6 +37,7 @@ export function NewTournament() {
         console.log(rounds)
 
         const data = {
+            userId: auth.currentUser.uid,
             name: tournamentName,
             numberOfTeams: tournamentTeams.length,
             teams: tournamentTeams,

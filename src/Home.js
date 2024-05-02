@@ -4,9 +4,11 @@ import tournamentService from './firebase/TournamentService';
 import { Games } from './Games';
 import { NewTournament } from './NewTournament';
 import { auth, signInWithGooglePopup } from './firebase/firebase';
+import { toBeInTheDOM } from '@testing-library/jest-dom/dist/matchers';
+//import {signOut} from './firebase.auth'
 
 export function Home(props) {
-    const [tournament, setTournament] = useState(null)
+    const [tournament, setTournament] = useState([])
     const [clicked, setClicked] = useState(false);
 
     useEffect(() => {
@@ -14,8 +16,15 @@ export function Home(props) {
     }, [])
 
     async function getTournamentNames() {
-        const tournament = await tournamentService.getTournaments();
-        setTournament(tournament);
+        const allTournaments = await tournamentService.getTournaments();
+        const newTournament = []
+
+        for(let i = 0; i <allTournaments.length; i++){
+            if(allTournaments[i].userId === auth.currentUser.uid){
+                newTournament.push(allTournaments[i])
+            }
+        }
+        setTournament(newTournament);
     }
 
     function showTournament(id) {
@@ -28,28 +37,10 @@ export function Home(props) {
         setClicked(true)
     }
 
-    const logGoogleUser = async () => {
-        const response = await signInWithGooglePopup();
-        console.log(response);
-      };
-
-    const onGoogleButtonClicked = async () => {
-        console.log("Current user: ")
-        console.log(auth.currentUser)
-        console.log("Name: ")
-        console.log(auth.currentUser.displayName)
-    }
-
-
+    //console.log(auth.currentUser.uid)
+    
     return (
         <div className="App-header">
-
-            <Button
-                type="submit"
-                onClick={onGoogleButtonClicked}
-            >
-                Google
-            </Button>
 
             {clicked ? <NewTournament /> : (
                 <>
@@ -65,6 +56,8 @@ export function Home(props) {
                     < Button onClick={onNewTournamentClick} color="pink"> Ny trunering </Button>
                 </>
             )}
+
+            
 
         </div >
     )

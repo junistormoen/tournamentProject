@@ -1,4 +1,4 @@
-import { collection, getDoc, doc, getDocs, setDoc } from "firebase/firestore";
+import { collection, getDoc, addDoc, doc, getDocs, setDoc } from "firebase/firestore";
 import { db } from "./firebase";
 
 
@@ -30,8 +30,7 @@ const tournamentService = {
 
   setTournament: async function (tournamentId, tournament) {
     console.log(tournament)
-    await setDoc(doc(db, "tournaments", tournamentId), tournament);
-    
+    await addDoc(collection(db, "tournaments"), tournament);
   }
 };
 
