@@ -42,7 +42,7 @@ export function NewTournament() {
         }
         console.log(data)
 
-        setTournamentId(await tournamentService.setTournament(data));
+        setTournamentId(await tournamentService.addTournament(data));
         setClicked(true)
     }
 

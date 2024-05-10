@@ -6,7 +6,6 @@ import { auth, signInWithGooglePopup } from './firebase/firebaseConfig';
 import { getAuth, signOut} from 'firebase/auth'
 
 export function Home(props) {
-    console.log("HOME")
     const [tournament, setTournament] = useState([])
     const [clicked, setClicked] = useState(false);
 
@@ -43,14 +42,10 @@ export function Home(props) {
     }
 
     function onSignOutClick(){
-        console.log("Logg ut")
-        console.log(auth)
         signOut(auth).then(() => {
-            console.log("logget ut")
         }). catch((error) => {
             console.log("Det skjedde en feil.")
         })
-        console.log(auth)
     }
 
     return (
