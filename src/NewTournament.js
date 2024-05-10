@@ -2,7 +2,7 @@ import React, { useState } from "react"
 import { Input, Button } from "@mantine/core"
 import { Games } from "./Games";
 import tournamentService from "./firebase/TournamentService";
-import { auth } from './firebase/firebase';
+import { auth } from './firebase/firebaseConfig';
 
 
 export function NewTournament() {
@@ -12,9 +12,6 @@ export function NewTournament() {
 
     const [clicked, setClicked] = useState(false);
 
-    function onIdInputChange(input) {
-        setTournamentId(input.target.value)
-    }
 
     function onNameInputChange(input) {
         setTournamentName(input.target.value)
@@ -45,7 +42,7 @@ export function NewTournament() {
         }
         console.log(data)
 
-        tournamentService.setTournament(tournamentId, data);
+        setTournamentId(await tournamentService.setTournament(data));
         setClicked(true)
     }
 
@@ -62,7 +59,7 @@ export function NewTournament() {
         }
 
         for (let i = 0; i < numTeams - 1; i++) {
-            rounds[i] = {matches:[]};
+            rounds[i] = { matches: [] };
             for (let j = 0; j < numTeams / 2; j++) {
                 const team1 = teams[j];
                 const team2 = teams[numTeams - 1 - j];
@@ -86,13 +83,10 @@ export function NewTournament() {
 
 
     return (
-        <div className="App-header">
+        <div className="App-container">
             {clicked ? <Games id={tournamentId}></Games> : (
                 <>
                     <h3>Legg til ny turnering</h3>
-                    <Input.Wrapper label="ID" description="Legg til en id på turneringen">
-                        <Input id="id" onChange={onIdInputChange}></Input>
-                    </Input.Wrapper>
                     <Input.Wrapper label="Navn" description="Legg til et navn på turneringen">
                         <Input id="name" onChange={onNameInputChange}></Input>
                     </Input.Wrapper>

@@ -1,25 +1,31 @@
 import './App.css';
 import React, { useState } from 'react';
-import { Games } from './Games';
+import { Games } from './Games'; 
 import { Home } from './Home';
 import { Start } from './Start';
-import { auth } from './firebase/firebase';
+import { auth } from './firebase/firebaseConfig';
 
-function App() {
-  //const [loggedIn, setLogedIn] = useState(false);
+export function App() {
   const [clicked, setClicked] = useState(false);
   const [tournamentId, setTournamentId] = useState(null)
-
-  function onClick() {
-    setClicked(true)
+ 
+  function onClick(id) {
+    setTournamentId(id) 
+    setClicked(true) 
   }
 
-  return (
-    <div className="App-header">
+  function onHomeClick(){
+    setClicked(false)
+  }
+  
 
-      {!auth ? <Start />:
-        (clicked) ? <Games id={tournamentId} /> : <Home setId={setTournamentId} id={tournamentId} onClick={onClick} />
-      }
+  return (
+    
+    <div className="App-header">
+ 
+      {auth.currentUser === null ? <Start />: 
+        (clicked) ? <Games id={tournamentId} onClick={onHomeClick}/> : <Home onClick={onClick} />
+      } 
 
     </div>
   );
