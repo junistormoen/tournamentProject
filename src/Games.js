@@ -1,35 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Text, Popover, Button, Tabs, Flex } from '@mantine/core';
+import { Table, Text, Button, Tabs } from '@mantine/core';
 import tournamentService from './firebase/TournamentService';
 
 export function Games(props) {
     const [tournament, setTournament] = useState(null)
     const [rounds, setRounds] = useState([])
-    console.log(props)
 
     useEffect(() => {
-        getTournament();
-    }, [])
+        getTournamentInfo();
+    })
 
-    async function getTournament() {
+    async function getTournamentInfo() {
         const tournamentInfo = await tournamentService.getTournament(props.id);
 
         setTournament(tournamentInfo);
         setRounds(tournamentInfo.rounds)
     }
 
-    function onReturnClick(){
-        console.log("RETURN")
-        props.onClick()
-    }
-
-
-
 
     return (
         <>
             <div className='App-header'>
-                    <Button onClick={onReturnClick}>Tilbake</Button>
+                    <Button onClick={props.onClick}>Tilbake</Button>
             </div>
 
             <div className='App-container'>

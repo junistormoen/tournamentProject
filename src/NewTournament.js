@@ -28,10 +28,7 @@ export function NewTournament() {
     }
 
     async function onGenerateClick() {
-        console.log(tournamentTeams)
-
         const rounds = generateRounds(tournamentTeams)
-        console.log(rounds)
 
         const data = {
             userId: auth.currentUser.uid,
@@ -40,9 +37,8 @@ export function NewTournament() {
             teams: tournamentTeams,
             rounds: rounds
         }
-        console.log(data)
 
-        setTournamentId(await tournamentService.setTournament(data));
+        setTournamentId(await tournamentService.addTournament(data));
         setClicked(true)
     }
 

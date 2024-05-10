@@ -21,15 +21,13 @@ const tournamentService = {
     )
 
     if (!docSnap.exists()) {
-      console.log("No such document!");
       return []
     }
 
     return docSnap.data()
   },
 
-  setTournament: async function (tournament) {
-    console.log(tournament)
+  addTournament: async function (tournament) {
     const data = await addDoc(collection(db, "tournaments"), tournament);
     return data.id
   }

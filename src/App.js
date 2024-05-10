@@ -18,16 +18,14 @@ export function App() {
     setClicked(false)
   }
   
-
   return (
     
-    <div className="App-header">
- 
+    <>
       {auth.currentUser === null ? <Start />: 
         (clicked) ? <Games id={tournamentId} onClick={onHomeClick}/> : <Home onClick={onClick} />
       } 
 
-    </div>
+    </>
   );
 }
 
