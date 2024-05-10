@@ -1,21 +1,29 @@
-import { auth, signInWithGooglePopup } from './firebase/firebase';
+import { auth, signInWithGooglePopup } from './firebase/firebaseConfig';
 import { Button } from '@mantine/core';
 import { Home } from './Home';
+import { App } from "./App.js";
+import { onAuthStateChanged } from 'firebase/auth';
+import React, { useState } from 'react';
 
 export function Start() {
+    const [currentUser, setCurrentUser] = useState("");
 
     const logGoogleUser = async () => {
-        const response = await signInWithGooglePopup();
+        console.log("START")
+        await signInWithGooglePopup();
         console.log(auth);
-
+        console.log(auth.currentUser)
     };
 
+    onAuthStateChanged(auth, (user) => {
+        setCurrentUser(user)
+    })
 
 
     return (
-        <div className="App-header">
+        <div className="App-container">
 
-            {!auth ? <Home/> :
+            {auth.currentUser !== null ? <App /> :
                 <Button
                     type="submit"
                     onClick={logGoogleUser}

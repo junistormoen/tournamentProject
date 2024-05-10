@@ -1,64 +1,80 @@
-import { Button, NumberInput } from '@mantine/core';
+import { Button } from '@mantine/core';
 import React, { useState, useEffect } from 'react';
 import tournamentService from './firebase/TournamentService';
-import { Games } from './Games';
 import { NewTournament } from './NewTournament';
-import { auth, signInWithGooglePopup } from './firebase/firebase';
-import { toBeInTheDOM } from '@testing-library/jest-dom/dist/matchers';
-//import {signOut} from './firebase.auth'
+import { auth, signInWithGooglePopup } from './firebase/firebaseConfig';
+import { getAuth, signOut} from 'firebase/auth'
 
 export function Home(props) {
+    console.log("HOME")
     const [tournament, setTournament] = useState([])
     const [clicked, setClicked] = useState(false);
 
     useEffect(() => {
-        getTournamentNames();
+        if (auth.currentUser) {
+            getTournamentNames();
+        }
     }, [])
 
     async function getTournamentNames() {
-        const allTournaments = await tournamentService.getTournaments();
-        const newTournament = []
+        try {
+            const allTournaments = await tournamentService.getTournaments();
+            const newTournament = []
 
-        for(let i = 0; i <allTournaments.length; i++){
-            if(allTournaments[i].userId === auth.currentUser.uid){
-                newTournament.push(allTournaments[i])
+            for (let i = 0; i < allTournaments.length; i++) {
+                if (allTournaments[i].userId === auth.currentUser.uid) {
+                    newTournament.push(allTournaments[i])
+                }
+
+
             }
+            setTournament(newTournament);
+        } catch (error) {
+            console.error("Feil ved henting av turneringsnavn: ", error)
         }
-        setTournament(newTournament);
     }
 
     function showTournament(id) {
-        props.setId(id)
-        props.onClick();
+        props.onClick(id);
     }
 
     function onNewTournamentClick() {
-        console.log("trykket på knappen")
         setClicked(true)
     }
 
-    //console.log(auth.currentUser.uid)
-    
+    function onSignOutClick(){
+        console.log("Logg ut")
+        console.log(auth)
+        signOut(auth).then(() => {
+            console.log("logget ut")
+        }). catch((error) => {
+            console.log("Det skjedde en feil.")
+        })
+        console.log(auth)
+    }
+
     return (
-        <div className="App-header">
+        <>
+            <div className='App-header'>
+                <Button onClick={onSignOutClick}>Logg ut</Button>
+            </div>
+            <div className="App-container">
 
-            {clicked ? <NewTournament /> : (
-                <>
-                    {tournament?.map(tournamentItem => (
-                        <p
-                            key={tournamentItem.id}
-                            onClick={() => showTournament(tournamentItem.id)}
-                            style={{ cursor: "pointer" }}
-                        >
-                            {tournamentItem.name}
-                        </p>
-                    ))}
-                    < Button onClick={onNewTournamentClick} color="pink"> Ny trunering </Button>
-                </>
-            )}
-
-            
-
-        </div >
+                {clicked ? <NewTournament /> : (
+                    <>
+                        {tournament?.map(tournamentItem => (
+                            <p
+                                key={tournamentItem.id}
+                                onClick={() => showTournament(tournamentItem.id)}
+                                style={{ cursor: "pointer" }}
+                            >
+                                {tournamentItem.name}
+                            </p>
+                        ))}
+                        < Button onClick={onNewTournamentClick} color="pink"> Ny trunering </Button>
+                    </>
+                )}
+            </div >
+        </>
     )
 }

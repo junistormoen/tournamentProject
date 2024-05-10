@@ -14,6 +14,17 @@
 }
 
 .App-header {
+  position: fixed; 
+  top: 10; 
+  left: 10; 
+  width: 100%; 
+  background-color: #282c34; 
+  z-index: 1000; 
+  padding: 10px; 
+  color: white;
+}
+
+.App-container {
   background-color: #282c34;
   min-height: 100vh;
   display: flex;

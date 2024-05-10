@@ -1,5 +1,5 @@
-import { collection, getDoc, addDoc, doc, getDocs, setDoc } from "firebase/firestore";
-import { db } from "./firebase";
+import { collection, getDoc, addDoc, doc, getDocs } from "firebase/firestore";
+import { db } from "./firebaseConfig";
 
 
 
@@ -28,9 +28,10 @@ const tournamentService = {
     return docSnap.data()
   },
 
-  setTournament: async function (tournamentId, tournament) {
+  setTournament: async function (tournament) {
     console.log(tournament)
-    await addDoc(collection(db, "tournaments"), tournament);
+    const data = await addDoc(collection(db, "tournaments"), tournament);
+    return data.id
   }
 };
 
