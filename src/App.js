@@ -18,7 +18,6 @@ export function App() {
     setClicked(false)
   }
   
-  console.log(auth.currentUser)
 
   return (
     
