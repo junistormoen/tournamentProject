@@ -8,7 +8,7 @@ import { auth } from './firebase/firebaseConfig';
 export function NewTournament() {
     const [tournamentId, setTournamentId] = useState("");
     const [tournamentName, setTournamentName] = useState("");
-    const [tournamentTeams, setTournamentTeams] = useState(['Lag 1', 'Lag 2']);
+    const [tournamentTeams, setTournamentTeams] = useState([{ name: 'Lag 1', score: 0 }, { name: 'Lag 2', score: 0 }]);
 
     const [clicked, setClicked] = useState(false);
 
@@ -18,13 +18,19 @@ export function NewTournament() {
     }
 
     function onTeamInputChange(index, input) {
-        const newTeamNames = [...tournamentTeams]
-        newTeamNames[index] = input.target.value
-        setTournamentTeams(newTeamNames);
+        const updatedTeams = tournamentTeams.map((team, idx) => {
+            if (idx === index) {
+                return { ...team, name: input.target.value }
+            }
+            return team
+        })
+        setTournamentTeams(updatedTeams)
     }
 
     function onAddTeamClick() {
-        setTournamentTeams([...tournamentTeams, 'Lag ' + (tournamentTeams.length + 1)])
+        const newTeamName = 'Lag ' + (tournamentTeams.length + 1);
+        const newTeam = { name: newTeamName, score: 0 }
+        setTournamentTeams([...tournamentTeams, newTeam])
     }
 
     async function onGenerateClick() {
@@ -62,10 +68,11 @@ export function NewTournament() {
 
                 if (team1 && team2) {
                     rounds[i].matches.push({
-                        team1: team1,
-                        team2: team2
+                        team1: team1.name,
+                        team2: team2.name
                     });
                 }
+
             }
             teams.splice(1, 0, teams.pop());
         }
@@ -84,11 +91,16 @@ export function NewTournament() {
                 <>
                     <h3>Legg til ny turnering</h3>
                     <Input.Wrapper label="Navn" description="Legg til et navn på turneringen">
-                        <Input id="name" onChange={onNameInputChange}></Input>
+                        <Input id="name" onChange={onNameInputChange} />
                     </Input.Wrapper>
                     <Input.Wrapper label="Lag" description=" ">
                         {tournamentTeams.map((team, index) => (
-                            <Input key={index} id={'team' + { index }} onChange={(e) => onTeamInputChange(index, e)} placeholder={team}></Input>
+                            <Input
+                                key={index} 
+                                id={'team' + { index }} 
+                                onChange={(e) => onTeamInputChange(index, e)} 
+                                placeholder={team.name}
+                                />
                         ))}
                     </Input.Wrapper>
                     <br />

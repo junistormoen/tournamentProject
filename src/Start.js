@@ -18,16 +18,17 @@ export function Start() {
 
 
     return (
-        <div className="App-container">
-
+        <>
             {loginUser ? <App /> :
-                <Button
-                    type="submit"
-                    onClick={logGoogleUser}
-                >
-                    Logg inn
-                </Button>
+                <div className="App-container">
+                    <Button
+                        type="submit"
+                        onClick={logGoogleUser}
+                    >
+                        Logg inn
+                    </Button>
+                </div>
             }
-        </div>
+        </>
     )
 }

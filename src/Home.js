@@ -25,7 +25,6 @@ export function Home(props) {
                     newTournament.push(allTournaments[i])
                 }
 
-
             }
             setTournament(newTournament);
         } catch (error) {
