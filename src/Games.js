@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useDisclosure } from '@mantine/hooks';
-import { Table, Text, Button, Tabs, Modal, Input } from '@mantine/core';
+import { Table, Text, Button, Tabs, Modal, Input, HoverCard, HoverCardTarget, HoverCardDropdown, Avatar, Stack } from '@mantine/core';
 import tournamentService from './firebase/TournamentService';
+import { auth } from './firebase/firebaseConfig';
+import { signOut } from 'firebase/auth'
 
 export function Games(props) {
     const [tournament, setTournament] = useState(null)
@@ -41,14 +43,31 @@ export function Games(props) {
 
     }
 
+    function onSignOutClick() {
+        signOut(auth).then(() => {
+        }).catch((error) => {
+            console.log("Det skjedde en feil.")
+        })
+    }
+
     return (
         <>
             <div className='App-header'>
                 <Button onClick={props.onClick}>Tilbake</Button>
+                <HoverCard>
+                    <HoverCardTarget>
+                        <Avatar src={auth.currentUser.photoURL} />
+                    </HoverCardTarget>
+                    <HoverCardDropdown>
+                        <Button variant="transparent" size="xs" onClick={onSignOutClick}>Logg ut</Button>
+                    </HoverCardDropdown>
+                </HoverCard>                
             </div>
 
-            <div className='App-container' style={{textAlign:'center'}}>
-                <h1>{tournament?.name}</h1>
+            <div className='App-container'>
+                <div className='App-title'>
+                    <h1>{tournament?.name}</h1>
+                </div>
 
                 <Tabs color="teal" variant="pills" defaultValue="tournament">
                     <Tabs.List>

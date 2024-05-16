@@ -36,17 +36,15 @@ const tournamentService = {
     const torunamentDoc = await getDoc(tournamentRef);
     const tournamentData = torunamentDoc.data();
 
-    console.log(result)
     const updatedRounds = [...tournamentData.rounds]
-    updatedRounds[roundIndex].matches[matchIndex].result = result
-
-    const matchTeams = updatedRounds[roundIndex].matches[matchIndex]
+    const match = updatedRounds[roundIndex].matches[matchIndex]
+    match.result = result
 
     const team1Score = parseInt(result.team1);
     const team2Score = parseInt(result.team2);
 
     tournamentData.teams.forEach((team) => {
-      if (team.name === matchTeams.team1) {
+      if (team.name === match.team1) {
         if (team1Score > team2Score) {
           team.score += 3;
         } else if (team1Score < team2Score) {
@@ -54,7 +52,7 @@ const tournamentService = {
         } else {
           team.score += 1;
         }
-      } else if (team.name === matchTeams.team2) {
+      } else if (team.name === match.team2) {
         if (team2Score > team1Score) {
           team.score += 3;
         } else if (team2Score < team1Score) {

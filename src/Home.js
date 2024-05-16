@@ -1,9 +1,9 @@
-import { Button } from '@mantine/core';
+import { Button, Avatar, HoverCard, HoverCardTarget, HoverCardDropdown } from '@mantine/core';
 import React, { useState, useEffect } from 'react';
 import tournamentService from './firebase/TournamentService';
 import { NewTournament } from './NewTournament';
 import { auth } from './firebase/firebaseConfig';
-import { signOut} from 'firebase/auth'
+import { signOut } from 'firebase/auth'
 
 export function Home(props) {
     const [tournament, setTournament] = useState([])
@@ -40,19 +40,29 @@ export function Home(props) {
         setClicked(true)
     }
 
-    function onSignOutClick(){
+    function onSignOutClick() {
         signOut(auth).then(() => {
         }).catch((error) => {
             console.log("Det skjedde en feil.")
         })
     }
 
+    console.log(auth)
+
     return (
         <>
             <div className='App-header'>
-                <Button onClick={onSignOutClick}>Logg ut</Button>
+                <Button onClick={onNewTournamentClick} color="pink"> Ny trunering </Button>
+                <HoverCard>
+                    <HoverCardTarget>
+                        <Avatar src={auth.currentUser.photoURL} />
+                    </HoverCardTarget>
+                    <HoverCardDropdown>
+                        <Button variant="transparent" size="xs" onClick={onSignOutClick}>Logg ut</Button>
+                    </HoverCardDropdown>
+                </HoverCard>
             </div>
-            
+
             <div className="App-container">
 
                 {clicked ? <NewTournament /> : (
@@ -66,7 +76,6 @@ export function Home(props) {
                                 {tournamentItem.name}
                             </p>
                         ))}
-                        < Button onClick={onNewTournamentClick} color="pink"> Ny trunering </Button>
                     </>
                 )}
             </div >
