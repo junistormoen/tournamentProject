@@ -37,6 +37,7 @@ export function Games(props) {
         await tournamentService.setResults(props.id, selectedMatch.roundIndex, selectedMatch.matchIndex, result)
     }
 
+
     return (
         <>
             <div className='App-container'>

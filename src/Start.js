@@ -17,8 +17,6 @@ export function Start() {
         return subscriber
     }, [])
 
-    console.log(logo)
-
     return (
         <>
             {loginUser ? <App /> :

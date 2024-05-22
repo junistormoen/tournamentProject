@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import tournamentService from './firebase/TournamentService';
 import { NewTournament } from './NewTournament';
 import { auth } from './firebase/firebaseConfig';
-import { signOut } from 'firebase/auth';
 
 export function Home(props) {
     const [tournament, setTournament] = useState([])
