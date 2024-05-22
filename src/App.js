@@ -3,11 +3,9 @@ import React, { useState } from 'react';
 import { Games } from './Games';
 import { Home } from './Home';
 import { Start } from './Start';
-import { NewTournament } from './NewTournament';
 import { auth } from './firebase/firebaseConfig';
 import { Button, HoverCard, HoverCardDropdown, HoverCardTarget, Avatar } from '@mantine/core';
 import { signOut } from 'firebase/auth';
-import logo from './logo.png';
 
 export function App() {
   const [clicked, setClicked] = useState(false);

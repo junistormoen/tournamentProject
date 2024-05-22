@@ -6,7 +6,7 @@ import { auth } from './firebase/firebaseConfig';
 
 export function Home(props) {
     const [tournament, setTournament] = useState([])
-    const [clicked, setClicked] = useState(false);
+    const clicked = false;
 
     useEffect(() => {
         if (auth.currentUser) {
@@ -36,8 +36,6 @@ export function Home(props) {
     }
 
 
-
-    console.log(auth)
 
     return (
         <>
