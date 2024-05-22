@@ -1,13 +1,12 @@
-import { Button } from '@mantine/core';
+
 import React, { useState, useEffect } from 'react';
 import tournamentService from './firebase/TournamentService';
 import { NewTournament } from './NewTournament';
 import { auth } from './firebase/firebaseConfig';
-import { signOut} from 'firebase/auth'
 
 export function Home(props) {
     const [tournament, setTournament] = useState([])
-    const [clicked, setClicked] = useState(false);
+    const clicked = false;
 
     useEffect(() => {
         if (auth.currentUser) {
@@ -25,7 +24,6 @@ export function Home(props) {
                     newTournament.push(allTournaments[i])
                 }
 
-
             }
             setTournament(newTournament);
         } catch (error) {
@@ -37,24 +35,13 @@ export function Home(props) {
         props.onClick(id);
     }
 
-    function onNewTournamentClick() {
-        setClicked(true)
-    }
 
-    function onSignOutClick(){
-        signOut(auth).then(() => {
-        }).catch((error) => {
-            console.log("Det skjedde en feil.")
-        })
-    }
 
     return (
         <>
-            <div className='App-header'>
-                <Button onClick={onSignOutClick}>Logg ut</Button>
-            </div>
-            
+
             <div className="App-container">
+                
 
                 {clicked ? <NewTournament /> : (
                     <>
@@ -67,7 +54,6 @@ export function Home(props) {
                                 {tournamentItem.name}
                             </p>
                         ))}
-                        < Button onClick={onNewTournamentClick} color="pink"> Ny trunering </Button>
                     </>
                 )}
             </div >

@@ -1,6 +1,5 @@
-import { collection, getDoc, addDoc, doc, getDocs } from "firebase/firestore";
+import { collection, getDoc, addDoc, doc, getDocs, updateDoc } from "firebase/firestore";
 import { db } from "./firebaseConfig";
-
 
 
 const tournamentService = {
@@ -30,6 +29,44 @@ const tournamentService = {
   addTournament: async function (tournament) {
     const data = await addDoc(collection(db, "tournaments"), tournament);
     return data.id
+  },
+
+  setResults: async function (tournamentId, roundIndex, matchIndex, result) {
+    const tournamentRef = doc(db, "tournaments", tournamentId);
+    const torunamentDoc = await getDoc(tournamentRef);
+    const tournamentData = torunamentDoc.data();
+
+    const updatedRounds = [...tournamentData.rounds]
+    const match = updatedRounds[roundIndex].matches[matchIndex]
+    match.result = result
+
+    const team1Score = parseInt(result.team1);
+    const team2Score = parseInt(result.team2);
+
+    tournamentData.teams.forEach((team) => {
+      if (team.name === match.team1) {
+        if (team1Score > team2Score) {
+          team.score += 3;
+        } else if (team1Score < team2Score) {
+          team.score += 0;
+        } else {
+          team.score += 1;
+        }
+      } else if (team.name === match.team2) {
+        if (team2Score > team1Score) {
+          team.score += 3;
+        } else if (team2Score < team1Score) {
+          team.score += 0;
+        } else {
+          team.score += 1;
+        }
+      }
+    });
+
+    await updateDoc(tournamentRef, {
+      rounds: updatedRounds,
+      teams: tournamentData.teams
+    })
   }
 };
 

@@ -1,8 +1,9 @@
 import { auth, signInWithGooglePopup } from './firebase/firebaseConfig';
-import { Button } from '@mantine/core';
+import { Button, Image } from '@mantine/core';
 import { App } from "./App.js";
 import { onAuthStateChanged } from 'firebase/auth';
 import React, { useEffect, useState } from 'react';
+import logo from './logo.png';
 
 export function Start() {
     const [loginUser, setLoginUser] = useState("");
@@ -16,18 +17,20 @@ export function Start() {
         return subscriber
     }, [])
 
-
     return (
-        <div className="App-container">
-
+        <>
             {loginUser ? <App /> :
-                <Button
-                    type="submit"
-                    onClick={logGoogleUser}
-                >
-                    Logg inn
-                </Button>
+                <div className="App-container">
+                    <Image src={logo} style={{height: 400, width: 400, paddingBottom: 50}}></Image>
+                    <Button
+                        color='#DB594A'
+                        type="submit"
+                        onClick={logGoogleUser}
+                    >
+                        Logg inn
+                    </Button>
+                </div>
             }
-        </div>
+        </>
     )
 }
