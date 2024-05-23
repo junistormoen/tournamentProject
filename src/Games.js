@@ -4,18 +4,19 @@ import { Table, Text, Button, Tabs, Modal, Input } from '@mantine/core';
 import tournamentService from './firebase/TournamentService';
 
 export function Games(props) {
-    const [tournament, setTournament] = useState(null)
-    const [rounds, setRounds] = useState([])
-
+    const [tournament, setTournament] = useState(null);
+    const [rounds, setRounds] = useState([]);
+    
     const [selectedMatch, setSelectedMatch] = useState({});
     const [team1Result, setTeam1Result] = useState('');
     const [team2Result, setTeam2Result] = useState('');
 
-    const [opened, { open: openModal, close: closeModal }] = useDisclosure(false);
+    const [addScoreModal, { open: openModal, close: closeModal }] = useDisclosure(false);
+    const [editTeamsModal, { open: openEditor, close: closeEditor }] = useDisclosure(false);
 
     useEffect(() => {
         getTournamentInfo();
-    })
+    }, [])
 
     async function getTournamentInfo() {
         const tournamentInfo = await tournamentService.getTournament(props.id);
@@ -27,16 +28,53 @@ export function Games(props) {
     function onTournamentClick(match, roundIndex, matchIndex) {
         setSelectedMatch({ match, roundIndex, matchIndex })
         openModal()
-
-        console.log("klikket på " + match.team1 + " vs " + match.team2)
     }
 
     async function onSaveResultsClick() {
         closeModal()
+        const oldResult = selectedMatch.match.result || false;
         const result = { team1: team1Result, team2: team2Result };
-        await tournamentService.setResults(props.id, selectedMatch.roundIndex, selectedMatch.matchIndex, result)
+        await tournamentService.setResults(props.id, selectedMatch.roundIndex, selectedMatch.matchIndex, result, oldResult)
+        getTournamentInfo()
     }
 
+    function onEditClick() {
+        openEditor()
+    }
+
+    function onDeleteClick(teamName) {
+        for (let i = 0; i < tournament.teams.length; i++) {
+            if (tournament.teams[i].name === teamName) {
+                tournament.teams.splice(i, 1)
+            }
+        }
+    }
+
+    function handleNameChange(oldName, newName) {
+        tournament.teams.map((team) => {
+            if (team.name === oldName) {
+                team.name = newName
+                return;
+            }
+        })
+
+        tournament.rounds.map((round) => {
+            round.matches.map((match) => {
+                if (match.team1 === oldName) {
+                    match.team1 = newName
+                } else if (match.team2 === oldName) {
+                    match.team2 = newName
+                }
+            })
+        })
+
+        setTournament(tournament)
+    }
+
+    function onSaveEditClick() {
+        closeEditor();
+        tournamentService.updateTeamNames(props.id, tournament)
+    }
 
     return (
         <>
@@ -80,23 +118,29 @@ export function Games(props) {
                                 </Table>
                             </div>
                         ))}
-                        <Modal opened={opened} onClose={closeModal} title="Legg til resultater">
+                        <Modal opened={addScoreModal} onClose={closeModal} title="Legg til resultater">
                             {selectedMatch.match && (
-                                <div>
-                                    <h3>{selectedMatch.match.team1}
-                                        <Input
-                                            type="number"
-                                            onChange={(e) => setTeam1Result(e.target.value)}
-                                        />
-                                        vs
-                                        <Input
-                                            type="number"
-                                            onChange={(e) => setTeam2Result(e.target.value)}
-                                        />
-                                        {selectedMatch.match.team2}</h3>
-                                    <Button onClick={() => onSaveResultsClick()}>Lagre</Button>
+                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                    <p style={{ margin: '0 10px' }}>{selectedMatch.match.team1}</p>
+                                    <Input
+                                        style={{ width: '50px', margin: '0 10px' }}
+                                        placeholder={(selectedMatch.match.result) ? selectedMatch.match.result.team1 : "-"}
+                                        type="number"
+                                        onChange={(e) => setTeam1Result(e.target.value)}
+                                    />
+                                    <p style={{ margin: '0 20px' }}> vs </p>
+                                    <Input
+                                        style={{ width: '50px', margin: '0 10px' }}
+                                        placeholder={(selectedMatch.match.result) ? selectedMatch.match.result.team2 : "-"}
+                                        type="number"
+                                        onChange={(e) => setTeam2Result(e.target.value)}
+                                    />
+                                    <p style={{ margin: '0 10px' }}>{selectedMatch.match.team2}</p>
                                 </div>
                             )}
+                            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                                <Button onClick={() => onSaveResultsClick()}>Lagre</Button>
+                            </div>
                         </Modal>
                     </Tabs.Panel>
 
@@ -129,9 +173,26 @@ export function Games(props) {
                         </Table>
                         <Button
                             size="xs"
+                            onClick={onEditClick}
+                            variant='transparent'
+                            color='gray'
                         >
                             Rediger
                         </Button>
+                        <Modal opened={editTeamsModal} onClose={closeEditor} title="Rediger lagnavn">
+                            {tournament?.teams.map((team, index) => (
+                                <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', justifyContent: 'center' }}>
+                                    <Input
+                                        placeholder={team.name}
+                                        onChange={(e) => handleNameChange(team.name, e.target.value)}
+                                    />
+                                    <Button variant='transparent' color='gray' size='xs' onClick={() => onDeleteClick(team.name)}>slett</Button>
+                                </div>
+                            ))}
+                            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                                <Button onClick={onSaveEditClick}>Lagre</Button>
+                            </div>
+                        </Modal>
                     </Tabs.Panel>
                 </Tabs>
             </div >
