@@ -6,18 +6,29 @@ import { Start } from './Start';
 import { auth } from './firebase/firebaseConfig';
 import { Button, HoverCard, HoverCardDropdown, HoverCardTarget, Avatar } from '@mantine/core';
 import { signOut } from 'firebase/auth';
+import { NewTournament } from './NewTournament';
+
 
 export function App() {
-  const [clicked, setClicked] = useState(false);
+  const [isGameClicked, setIsGameClicked] = useState(false);
   const [tournamentId, setTournamentId] = useState(null)
 
   function onClick(id) {
     setTournamentId(id)
-    setClicked(true)
+    setIsGameClicked(true)
+  }
+
+  function onBackClicked() {
+    setTournamentId(null)
+    setIsGameClicked(false)
+  }
+
+  function onNewTournamentClick() {
+    setTournamentId("new")
   }
 
   function onHomeClick() {
-    setClicked(false)
+    setIsGameClicked(false)
   }
 
   function onSignOutClick() {
@@ -27,18 +38,18 @@ export function App() {
     })
   }
 
-  
-
   return (
 
     <>
       {auth.currentUser === null ? <Start /> :
-        (clicked) ? <Games id={tournamentId} onClick={onHomeClick} /> : <Home onClick={onClick} />
+        (tournamentId === "new") ? <NewTournament></NewTournament> :
+          (isGameClicked) ? <Games id={tournamentId} onClick={onHomeClick} /> : <Home onClick={onClick} />
       }
 
       {auth.currentUser &&
         <div className='App-header'>
-          {(tournamentId) ? <Button onClick={onClick}>Tilbake</Button> : <Button onClick={oncancel} color="pink"> Ny turnering </Button>}
+          {(tournamentId) ?
+            <Button onClick={onBackClicked} color='#DB594A'>Tilbake</Button> : <Button onClick={onNewTournamentClick} color='#DB594A'> Ny turnering </Button>}
           <HoverCard>
             <HoverCardTarget>
               <Avatar src={auth.currentUser.photoURL} />
@@ -48,9 +59,6 @@ export function App() {
             </HoverCardDropdown>
           </HoverCard>
         </div>}
-
-
-
     </>
   );
 }

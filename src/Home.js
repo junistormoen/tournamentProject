@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import tournamentService from './firebase/TournamentService';
 import { NewTournament } from './NewTournament';
 import { auth } from './firebase/firebaseConfig';
+import { Image, Text } from '@mantine/core';
+import logo from './logo.png';
 
 export function Home(props) {
     const [tournament, setTournament] = useState([])
@@ -36,15 +38,14 @@ export function Home(props) {
     }
 
 
-
     return (
         <>
 
             <div className="App-container">
-                
-
                 {clicked ? <NewTournament /> : (
                     <>
+                        <Image src={logo} style={{ height: 300, width: 250, paddingBottom: 50 }}></Image>
+
                         {tournament?.map(tournamentItem => (
                             <p
                                 key={tournamentItem.id}
@@ -54,6 +55,9 @@ export function Home(props) {
                                 {tournamentItem.name}
                             </p>
                         ))}
+
+                        {(tournament.length === 0) &&
+                            <Text>Ingen turneringer enda</Text>}
                     </>
                 )}
             </div >

@@ -31,7 +31,7 @@ const tournamentService = {
     return data.id
   },
 
-  setResults: async function (tournamentId, roundIndex, matchIndex, result) {
+  setResults: async function (tournamentId, roundIndex, matchIndex, result, oldResult) {
     const tournamentRef = doc(db, "tournaments", tournamentId);
     const torunamentDoc = await getDoc(tournamentRef);
     const tournamentData = torunamentDoc.data();
@@ -42,6 +42,24 @@ const tournamentService = {
 
     const team1Score = parseInt(result.team1);
     const team2Score = parseInt(result.team2);
+
+    if (oldResult) {
+      tournamentData.teams.forEach((team) => {
+        if (team.name === match.team1) {
+          if (oldResult.team1 > oldResult.team2) {
+            team.score -= 3;
+          } else if (oldResult.team1 === oldResult.team2) {
+            team.score -= 1;
+          }
+        } else if (team.name === match.team2) {
+          if (oldResult.team2 > oldResult.team1) {
+            team.score -= 3;
+          } else if (oldResult.team2 === oldResult.team1) {
+            team.score -= 1;
+          }
+        }
+      });
+    }
 
     tournamentData.teams.forEach((team) => {
       if (team.name === match.team1) {
@@ -67,6 +85,11 @@ const tournamentService = {
       rounds: updatedRounds,
       teams: tournamentData.teams
     })
+  },
+
+  updateTeamNames: async function (tournamentId, updatedTournament) {
+    const tournamentRef = doc(db, "tournaments", tournamentId);
+    await updateDoc(tournamentRef, updatedTournament)
   }
 };
 

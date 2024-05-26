@@ -1,8 +1,9 @@
 import React, { useState } from "react"
-import { Input, Button } from "@mantine/core"
+import { Input, Button, Image } from "@mantine/core"
 import { Games } from "./Games";
 import tournamentService from "./firebase/TournamentService";
 import { auth } from './firebase/firebaseConfig';
+import logo from "./logo.png"
 
 
 export function NewTournament() {
@@ -89,6 +90,7 @@ export function NewTournament() {
         <div className="App-container">
             {clicked ? <Games id={tournamentId}></Games> : (
                 <>
+                <Image src={logo} style={{ height: 300, width: 250, paddingBottom: 10 }}></Image>
                     <h3>Legg til ny turnering</h3>
                     <Input.Wrapper label="Navn" description="Legg til et navn på turneringen">
                         <Input id="name" onChange={onNameInputChange} />
@@ -104,9 +106,9 @@ export function NewTournament() {
                         ))}
                     </Input.Wrapper>
                     <br />
-                    <Button fullWidth variant='subtle' onClick={onAddTeamClick}>Legg til flere lag</Button>
+                    <Button variant='subtle' onClick={onAddTeamClick}>Legg til flere lag</Button>
                     <br />
-                    <Button fullWidth onClick={onGenerateClick}>Generer turnering</Button>
+                    <Button onClick={onGenerateClick}>Generer turnering</Button>
                 </>
             )}
         </div>
