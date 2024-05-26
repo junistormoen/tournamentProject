@@ -6,7 +6,6 @@ const tournamentService = {
   getTournaments: async function () {
     const tournaments = [];
     const querySnapshot = await getDocs(collection(db, 'tournaments'));
-    console.log("henter navn")
 
     querySnapshot.forEach((doc) => {
       tournaments.push({ id: doc.id, ...doc.data() });
@@ -19,7 +18,6 @@ const tournamentService = {
     const docSnap = await getDoc(
       doc(db, "tournaments", tournamentId)
     )
-    console.log("henter turnering")
 
     if (!docSnap.exists()) {
       return []
@@ -36,7 +34,6 @@ const tournamentService = {
   setResults: async function (tournamentId, roundIndex, matchIndex, result, oldResult) {
     const tournamentRef = doc(db, "tournaments", tournamentId);
     const torunamentDoc = await getDoc(tournamentRef);
-    console.log("henter info")
     const tournamentData = torunamentDoc.data();
 
     const updatedRounds = [...tournamentData.rounds]

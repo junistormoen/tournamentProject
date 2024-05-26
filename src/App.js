@@ -10,26 +10,25 @@ import { NewTournament } from './NewTournament';
 
 
 export function App() {
-  const [clicked, setClicked] = useState(false);
+  const [isGameClicked, setIsGameClicked] = useState(false);
   const [tournamentId, setTournamentId] = useState(null)
 
   function onClick(id) {
     setTournamentId(id)
-    setClicked(true)
+    setIsGameClicked(true)
   }
 
-  function onReturnClick() {
+  function onBackClicked() {
     setTournamentId(null)
-    setClicked(false)
+    setIsGameClicked(false)
   }
 
   function onNewTournamentClick() {
     setTournamentId("new")
-    console.log("klikk")
   }
 
   function onHomeClick() {
-    setClicked(false)
+    setIsGameClicked(false)
   }
 
   function onSignOutClick() {
@@ -44,13 +43,13 @@ export function App() {
     <>
       {auth.currentUser === null ? <Start /> :
         (tournamentId === "new") ? <NewTournament></NewTournament> :
-          (clicked) ? <Games id={tournamentId} onClick={onHomeClick} /> : <Home onClick={onClick} />
+          (isGameClicked) ? <Games id={tournamentId} onClick={onHomeClick} /> : <Home onClick={onClick} />
       }
 
       {auth.currentUser &&
         <div className='App-header'>
           {(tournamentId) ?
-            <Button onClick={onReturnClick} color='#DB594A'>Tilbake</Button> : <Button onClick={onNewTournamentClick} color='#DB594A'> Ny turnering </Button>}
+            <Button onClick={onBackClicked} color='#DB594A'>Tilbake</Button> : <Button onClick={onNewTournamentClick} color='#DB594A'> Ny turnering </Button>}
           <HoverCard>
             <HoverCardTarget>
               <Avatar src={auth.currentUser.photoURL} />

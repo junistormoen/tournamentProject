@@ -6,7 +6,7 @@ import tournamentService from './firebase/TournamentService';
 export function Games(props) {
     const [tournament, setTournament] = useState(null);
     const [rounds, setRounds] = useState([]);
-    
+
     const [selectedMatch, setSelectedMatch] = useState({});
     const [team1Result, setTeam1Result] = useState('');
     const [team2Result, setTeam2Result] = useState('');
@@ -97,6 +97,7 @@ export function Games(props) {
                     </Tabs.List>
 
                     <Tabs.Panel value="tournament">
+                       <Text size="xs" style={{paddingTop:'20px'}}>Klikk på en kamp for å legge til resultater</Text> 
                         {rounds.map((round, roundIndex) => (
                             <div key={roundIndex}>
                                 <Text style={{ marginTop: "20px" }} c="dimmed">Runde {roundIndex + 1} </Text>
@@ -104,7 +105,7 @@ export function Games(props) {
                                     <Table.Tbody>
                                         {round.matches.map((match, matchIndex) => (
                                             <Table.Tr key={matchIndex}
-                                                style={{ opacity: match.result ? 0.5 : 1 }}
+                                                style={{ opacity: match.result ? 0.5 : 1, cursor: "pointer" }}
                                                 onClick={() => onTournamentClick(match, roundIndex, matchIndex)}>
                                                 <Table.Td>{match.team1}</Table.Td>
                                                 {match.result ? (<Table.Td>{match.result.team1}</Table.Td>) : (<Table.Td>-</Table.Td>)}
