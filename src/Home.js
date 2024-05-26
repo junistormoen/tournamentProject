@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import tournamentService from './firebase/TournamentService';
 import { NewTournament } from './NewTournament';
 import { auth } from './firebase/firebaseConfig';
-import { Image, Text, Button } from '@mantine/core';
+import { Image, Text } from '@mantine/core';
 import logo from './logo.png';
 
 export function Home(props) {
@@ -56,7 +56,8 @@ export function Home(props) {
                             </p>
                         ))}
 
-                        {(tournament.length === 0) && <Text>Ingen turneringer enda</Text>}
+                        {(tournament.length === 0) &&
+                            <Text>Ingen turneringer enda</Text>}
                     </>
                 )}
             </div >

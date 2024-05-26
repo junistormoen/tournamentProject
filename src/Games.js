@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import { Table, Text, Button, Tabs, Modal, Input } from '@mantine/core';
 import tournamentService from './firebase/TournamentService';
@@ -14,16 +14,15 @@ export function Games(props) {
     const [addScoreModal, { open: openModal, close: closeModal }] = useDisclosure(false);
     const [editTeamsModal, { open: openEditor, close: closeEditor }] = useDisclosure(false);
 
+    const getTournamentInfo = useCallback(async () => {
+        const tournamentInfo = await tournamentService.getTournament(props.id);
+        setTournament(tournamentInfo);
+        setRounds(tournamentInfo.rounds);
+    }, [props.id]);
+
     useEffect(() => {
         getTournamentInfo();
-    }, [])
-
-    async function getTournamentInfo() {
-        const tournamentInfo = await tournamentService.getTournament(props.id);
-
-        setTournament(tournamentInfo);
-        setRounds(tournamentInfo.rounds)
-    }
+    }, [getTournamentInfo])
 
     function onTournamentClick(match, roundIndex, matchIndex) {
         setSelectedMatch({ match, roundIndex, matchIndex })
@@ -51,15 +50,15 @@ export function Games(props) {
     }
 
     function handleNameChange(oldName, newName) {
-        tournament.teams.map((team) => {
+        tournament.teams.forEach((team) => {
             if (team.name === oldName) {
                 team.name = newName
                 return;
             }
         })
 
-        tournament.rounds.map((round) => {
-            round.matches.map((match) => {
+        tournament.rounds.forEach((round) => {
+            round.matches.forEach((match) => {
                 if (match.team1 === oldName) {
                     match.team1 = newName
                 } else if (match.team2 === oldName) {
