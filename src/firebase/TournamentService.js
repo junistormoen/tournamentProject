@@ -88,6 +88,7 @@ const tournamentService = {
   },
 
   updateTeamNames: async function (tournamentId, updatedTournament) {
+    console.log(updatedTournament)
     const tournamentRef = doc(db, "tournaments", tournamentId);
     await updateDoc(tournamentRef, updatedTournament)
   }

@@ -4,12 +4,15 @@ import { Table, Text, Button, Tabs, Modal, Input } from '@mantine/core';
 import tournamentService from './firebase/TournamentService';
 
 export function Games(props) {
+    const [tournamentStarted, setTournamentStarted] = useState(false)
     const [tournament, setTournament] = useState(null);
-    const [rounds, setRounds] = useState([]);
+    const [editTournament, setEditTournament] = useState(null)
+    const [rounds, setRounds] = useState([])
 
     const [selectedMatch, setSelectedMatch] = useState({});
     const [team1Result, setTeam1Result] = useState('');
     const [team2Result, setTeam2Result] = useState('');
+    const [alertText, setAlertText] = useState(false)
 
     const [addScoreModal, { open: openModal, close: closeModal }] = useDisclosure(false);
     const [editTeamsModal, { open: openEditor, close: closeEditor }] = useDisclosure(false);
@@ -30,23 +33,35 @@ export function Games(props) {
     }
 
     async function onSaveResultsClick() {
-        closeModal()
-        const oldResult = selectedMatch.match.result || false;
-        const result = { team1: team1Result, team2: team2Result };
-        await tournamentService.setResults(props.id, selectedMatch.roundIndex, selectedMatch.matchIndex, result, oldResult)
-        getTournamentInfo()
+        if (team1Result && team2Result) {
+            closeModal()
+            const oldResult = selectedMatch.match.result || false;
+            const result = { team1: team1Result, team2: team2Result };
+            await tournamentService.setResults(props.id, selectedMatch.roundIndex, selectedMatch.matchIndex, result, oldResult)
+            getTournamentInfo()
+
+            setTournamentStarted(true)
+            setTeam1Result(null)
+            setTeam2Result(null)
+            setAlertText(false)
+        } else {
+            setAlertText(true)
+        }
     }
 
     function onEditClick() {
         openEditor()
+        setEditTournament(tournament)
     }
 
     function onDeleteClick(teamName) {
-        for (let i = 0; i < tournament.teams.length; i++) {
-            if (tournament.teams[i].name === teamName) {
-                tournament.teams.splice(i, 1)
-            }
-        }
+        const updatedTeams = editTournament.teams.filter(team => team.name !== teamName);
+        const updatedRounds = editTournament.rounds.map(round => ({
+            ...round,
+            matches: round.matches.filter(match => match.team1 !== teamName && match.team2 !== teamName)
+        }));
+
+        setEditTournament({ ...editTournament, teams: updatedTeams, rounds: updatedRounds, numberOfTeams: updatedTeams.length })
     }
 
     function handleNameChange(oldName, newName) {
@@ -72,7 +87,8 @@ export function Games(props) {
 
     function onSaveEditClick() {
         closeEditor();
-        tournamentService.updateTeamNames(props.id, tournament)
+        tournamentService.updateTeamNames(props.id, editTournament)
+        getTournamentInfo()
     }
 
     return (
@@ -82,21 +98,21 @@ export function Games(props) {
                     <h1>{tournament?.name}</h1>
                 </div>
 
-                <Tabs color="teal" variant="pills" defaultValue="tournament">
-                    <Tabs.List>
+                <Tabs color="teal" variant="pills" defaultValue="tournament" radius="md" style={{ color: '#838584' }}>
+                    <Tabs.List >
                         <Tabs.Tab value="tournament">
-                            Turnering
+                            Kamper
                         </Tabs.Tab>
                         <Tabs.Tab value="results">
                             Resultater
                         </Tabs.Tab>
                         <Tabs.Tab value="teams">
-                            Lag
+                            Info
                         </Tabs.Tab>
                     </Tabs.List>
 
-                    <Tabs.Panel value="tournament">
-                       <Text size="xs" style={{paddingTop:'20px'}}>Klikk på en kamp for å legge til resultater</Text> 
+                    <Tabs.Panel value="tournament" style={{ color: 'white' }}>
+                        <Text size="xs" style={{ paddingTop: '20px' }}>Klikk på en kamp for å legge til resultater</Text>
                         {rounds.map((round, roundIndex) => (
                             <div key={roundIndex}>
                                 <Text style={{ marginTop: "20px" }} c="dimmed">Runde {roundIndex + 1} </Text>
@@ -141,13 +157,17 @@ export function Games(props) {
                             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
                                 <Button onClick={() => onSaveResultsClick()}>Lagre</Button>
                             </div>
+                            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                                {alertText && <Text color='red' size='sm'>Legg til resultater for å lagre</Text>}
+                            </div>
                         </Modal>
                     </Tabs.Panel>
 
-                    <Tabs.Panel value="results">
+                    <Tabs.Panel value="results" style={{ color: 'white' }}>
                         <Table>
                             <Table.Tbody>
                                 {tournament?.teams
+                                    .slice()
                                     .sort((a, b) => b.score - a.score)
                                     .map((team, index) => (
                                         <Table.Tr key={index}>
@@ -160,14 +180,15 @@ export function Games(props) {
                         </Table>
                     </Tabs.Panel>
 
-                    <Tabs.Panel value="teams">
+                    <Tabs.Panel value="teams" style={{ color: 'white' }}>
                         <Table style={{ margin: '0 auto', maxWidth: 600, textAlign: 'center' }}>
                             <Table.Tbody>
-                                {tournament?.teams.map((team, index) => (
-                                    <Table.Tr key={index}>
-                                        <Table.Td>{team.name}</Table.Td>
-                                    </Table.Tr>
-                                ))}
+                                {tournament?.teams
+                                    .map((team, index) => (
+                                        <Table.Tr key={index}>
+                                            <Table.Td>{team.name}</Table.Td>
+                                        </Table.Tr>
+                                    ))}
                             </Table.Tbody>
 
                         </Table>
@@ -179,8 +200,8 @@ export function Games(props) {
                         >
                             Rediger
                         </Button>
-                        <Modal opened={editTeamsModal} onClose={closeEditor} title="Rediger lagnavn">
-                            {tournament?.teams.map((team, index) => (
+                        <Modal opened={editTeamsModal} onClose={closeEditor} title="Rediger lagnavn" >
+                            {editTournament?.teams.map((team, index) => (
                                 <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', justifyContent: 'center' }}>
                                     <Input
                                         placeholder={team.name}
@@ -189,8 +210,17 @@ export function Games(props) {
                                     <Button variant='transparent' color='gray' size='xs' onClick={() => onDeleteClick(team.name)}>slett</Button>
                                 </div>
                             ))}
+
                             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-                                <Button onClick={onSaveEditClick}>Lagre</Button>
+                                {tournamentStarted ?
+                                    <Text size='xs' color='grey'>Kan ikke legge til flere lag</Text>
+                                    :
+                                    <Button variant='subtle' size='xs'>Legg til flere lag</Button>
+                                }
+                            </div>
+
+                            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                                <Button onClick={() => onSaveEditClick()}>Lagre</Button>
                             </div>
                         </Modal>
                     </Tabs.Panel>

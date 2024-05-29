@@ -8,7 +8,7 @@ import logo from "./logo.png"
 
 export function NewTournament() {
     const [tournamentId, setTournamentId] = useState("");
-    const [tournamentName, setTournamentName] = useState("");
+    const [tournamentName, setTournamentName] = useState("Min turnering");
     const [tournamentTeams, setTournamentTeams] = useState([{ name: 'Lag 1', score: 0 }, { name: 'Lag 2', score: 0 }]);
 
     const [clicked, setClicked] = useState(false);
