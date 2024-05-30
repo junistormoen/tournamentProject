@@ -19,6 +19,7 @@ export function Home(props) {
     async function getTournamentNames() {
         try {
             const allTournaments = await tournamentService.getTournaments();
+            console.log(allTournaments)
             const newTournament = []
 
             for (let i = 0; i < allTournaments.length; i++) {

@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import { Table, Text, Button, Tabs, Modal, Input } from '@mantine/core';
 import tournamentService from './firebase/TournamentService';
+import gameService from './GameService';
 
 export function Games(props) {
     const [tournamentStarted, setTournamentStarted] = useState(false)
@@ -17,17 +18,17 @@ export function Games(props) {
     const [addScoreModal, { open: openModal, close: closeModal }] = useDisclosure(false);
     const [editTeamsModal, { open: openEditor, close: closeEditor }] = useDisclosure(false);
 
-    const getTournamentInfo = useCallback(async () => {
+    const getTournamentInfo = async () => {
         const tournamentInfo = await tournamentService.getTournament(props.id);
         setTournament(tournamentInfo);
         setRounds(tournamentInfo.rounds);
-    }, [props.id]);
+    };
 
     useEffect(() => {
         getTournamentInfo();
     }, [getTournamentInfo])
 
-    function onTournamentClick(match, roundIndex, matchIndex) {
+    function onMatchClick(match, roundIndex, matchIndex) {
         setSelectedMatch({ match, roundIndex, matchIndex })
         openModal()
     }
@@ -35,10 +36,12 @@ export function Games(props) {
     async function onSaveResultsClick() {
         if (team1Result && team2Result) {
             closeModal()
+            
             const oldResult = selectedMatch.match.result || false;
-            const result = { team1: team1Result, team2: team2Result };
-            await tournamentService.setResults(props.id, selectedMatch.roundIndex, selectedMatch.matchIndex, result, oldResult)
-            getTournamentInfo()
+            const newResult = { team1: team1Result, team2: team2Result };
+
+            const updatedTournament = await gameService.calculateResults(tournament, newResult, oldResult, selectedMatch.roundIndex, selectedMatch.matchIndex)
+            await tournamentService.setResults(props.id, updatedTournament)
 
             setTournamentStarted(true)
             setTeam1Result(null)
@@ -54,25 +57,15 @@ export function Games(props) {
         setEditTournament(tournament)
     }
 
-    function onDeleteClick(teamName) {
-        const updatedTeams = editTournament.teams.filter(team => team.name !== teamName);
-        const updatedRounds = editTournament.rounds.map(round => ({
-            ...round,
-            matches: round.matches.filter(match => match.team1 !== teamName && match.team2 !== teamName)
-        }));
-
-        setEditTournament({ ...editTournament, teams: updatedTeams, rounds: updatedRounds, numberOfTeams: updatedTeams.length })
-    }
-
     function handleNameChange(oldName, newName) {
-        tournament.teams.forEach((team) => {
+        editTournament.teams.forEach((team) => {
             if (team.name === oldName) {
                 team.name = newName
                 return;
             }
         })
 
-        tournament.rounds.forEach((round) => {
+        editTournament.rounds.forEach((round) => {
             round.matches.forEach((match) => {
                 if (match.team1 === oldName) {
                     match.team1 = newName
@@ -82,13 +75,25 @@ export function Games(props) {
             })
         })
 
-        setTournament(tournament)
+        setEditTournament(editTournament)
+    }
+
+    function onAddTeamClick(){
+        const newTeam = {name: "Lag " + (editTournament.teams.length + 1), score: 0}
+        editTournament.teams.push(newTeam)
+        const updatedRounds = gameService.generateRounds(editTournament.teams)
+        setEditTournament({...editTournament, rounds: updatedRounds})
+    }
+
+    function onDeleteTeamClick(teamName) {
+        const updatedTeams = editTournament.teams.filter(team => team.name !== teamName);
+        const updatedRounds = gameService.generateRounds(updatedTeams);
+        setEditTournament({ ...editTournament, teams: updatedTeams, rounds: updatedRounds, numberOfTeams: updatedTeams.length })
     }
 
     function onSaveEditClick() {
         closeEditor();
         tournamentService.updateTeamNames(props.id, editTournament)
-        getTournamentInfo()
     }
 
     return (
@@ -99,7 +104,7 @@ export function Games(props) {
                 </div>
 
                 <Tabs color="teal" variant="pills" defaultValue="tournament" radius="md" style={{ color: '#838584' }}>
-                    <Tabs.List >
+                    <Tabs.List style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                         <Tabs.Tab value="tournament">
                             Kamper
                         </Tabs.Tab>
@@ -115,18 +120,18 @@ export function Games(props) {
                         <Text size="xs" style={{ paddingTop: '20px' }}>Klikk på en kamp for å legge til resultater</Text>
                         {rounds.map((round, roundIndex) => (
                             <div key={roundIndex}>
-                                <Text style={{ marginTop: "20px" }} c="dimmed">Runde {roundIndex + 1} </Text>
+                                {round.matches.length > 0 && <Text style={{ marginTop: "20px" }} c="dimmed">Runde {roundIndex + 1} </Text>}
                                 <Table>
                                     <Table.Tbody>
                                         {round.matches.map((match, matchIndex) => (
                                             <Table.Tr key={matchIndex}
                                                 style={{ opacity: match.result ? 0.5 : 1, cursor: "pointer" }}
-                                                onClick={() => onTournamentClick(match, roundIndex, matchIndex)}>
-                                                <Table.Td>{match.team1}</Table.Td>
+                                                onClick={() => onMatchClick(match, roundIndex, matchIndex)}>
+                                                <Table.Td width='200px'>{match.team1}</Table.Td>
                                                 {match.result ? (<Table.Td>{match.result.team1}</Table.Td>) : (<Table.Td>-</Table.Td>)}
                                                 <Table.Td>vs</Table.Td>
                                                 {match.result ? (<Table.Td>{match.result.team2}</Table.Td>) : (<Table.Td>-</Table.Td>)}
-                                                <Table.Td>{match.team2}</Table.Td>
+                                                <Table.Td width='200px'>{match.team2}</Table.Td>
                                             </Table.Tr>
                                         ))
                                         }
@@ -137,21 +142,21 @@ export function Games(props) {
                         <Modal opened={addScoreModal} onClose={closeModal} title="Legg til resultater">
                             {selectedMatch.match && (
                                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                    <p style={{ margin: '0 10px' }}>{selectedMatch.match.team1}</p>
+                                    <p width='200px' style={{ margin: '0 10px'}}>{selectedMatch.match.team1}</p>
                                     <Input
                                         style={{ width: '50px', margin: '0 10px' }}
                                         placeholder={(selectedMatch.match.result) ? selectedMatch.match.result.team1 : "-"}
                                         type="number"
                                         onChange={(e) => setTeam1Result(e.target.value)}
                                     />
-                                    <p style={{ margin: '0 20px' }}> vs </p>
+                                    <p style={{ margin: '0 20px'}}> vs </p>
                                     <Input
                                         style={{ width: '50px', margin: '0 10px' }}
                                         placeholder={(selectedMatch.match.result) ? selectedMatch.match.result.team2 : "-"}
                                         type="number"
                                         onChange={(e) => setTeam2Result(e.target.value)}
                                     />
-                                    <p style={{ margin: '0 10px' }}>{selectedMatch.match.team2}</p>
+                                    <p width='200px' style={{ margin: '0 10px'}}>{selectedMatch.match.team2}</p>
                                 </div>
                             )}
                             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
@@ -206,16 +211,17 @@ export function Games(props) {
                                     <Input
                                         placeholder={team.name}
                                         onChange={(e) => handleNameChange(team.name, e.target.value)}
+                                        maxLength={25}
                                     />
-                                    <Button variant='transparent' color='gray' size='xs' onClick={() => onDeleteClick(team.name)}>slett</Button>
+                                    {!tournamentStarted && <Button variant='transparent' color='gray' size='xs' onClick={() => onDeleteTeamClick(team.name)}>slett</Button>}
                                 </div>
                             ))}
 
                             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
                                 {tournamentStarted ?
-                                    <Text size='xs' color='grey'>Kan ikke legge til flere lag</Text>
+                                    <Text size='xs' color='gray'>Kan ikke legge til eller slette lag</Text>
                                     :
-                                    <Button variant='subtle' size='xs'>Legg til flere lag</Button>
+                                    <Button variant='subtle' size='xs' onClick={() => onAddTeamClick()}>Legg til flere lag</Button>
                                 }
                             </div>
 

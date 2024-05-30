@@ -1,5 +1,5 @@
 import { auth, signInWithGooglePopup } from './firebase/firebaseConfig';
-import { Button, Image } from '@mantine/core';
+import { Button, Image, Loader } from '@mantine/core';
 import { App } from "./App.js";
 import { onAuthStateChanged } from 'firebase/auth';
 import React, { useEffect, useState } from 'react';
@@ -19,7 +19,7 @@ export function Start() {
 
     return (
         <>
-            {loginUser ? <App /> :
+            {loginUser ? <App/>:
                 <div className="App-container">
                     <Image src={logo} style={{height: 400, width: 400, paddingBottom: 50}}></Image>
                     <Button

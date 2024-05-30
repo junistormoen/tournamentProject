@@ -2,12 +2,13 @@ import React, { useState } from "react"
 import { Input, Button, Image } from "@mantine/core"
 import { Games } from "./Games";
 import tournamentService from "./firebase/TournamentService";
+import gameService from "./GameService"
 import { auth } from './firebase/firebaseConfig';
 import logo from "./logo.png"
 
 
 export function NewTournament() {
-    const [tournamentId, setTournamentId] = useState("");
+    const [tournamentId, setTournamentId] = useState(null);
     const [tournamentName, setTournamentName] = useState("Min turnering");
     const [tournamentTeams, setTournamentTeams] = useState([{ name: 'Lag 1', score: 0 }, { name: 'Lag 2', score: 0 }]);
 
@@ -35,7 +36,7 @@ export function NewTournament() {
     }
 
     async function onGenerateClick() {
-        const rounds = generateRounds(tournamentTeams)
+        const rounds = gameService.generateRounds(tournamentTeams)
 
         const data = {
             userId: auth.currentUser.uid,
@@ -50,40 +51,7 @@ export function NewTournament() {
     }
 
 
-    function generateRounds(teams) {
-        let numTeams = teams.length;
-        let addedTeam = false;
-        const rounds = [];
-
-        if (numTeams % 2 !== 0) {
-            teams.push(null);
-            numTeams++;
-            addedTeam = true
-        }
-
-        for (let i = 0; i < numTeams - 1; i++) {
-            rounds[i] = { matches: [] };
-            for (let j = 0; j < numTeams / 2; j++) {
-                const team1 = teams[j];
-                const team2 = teams[numTeams - 1 - j];
-
-                if (team1 && team2) {
-                    rounds[i].matches.push({
-                        team1: team1.name,
-                        team2: team2.name
-                    });
-                }
-
-            }
-            teams.splice(1, 0, teams.pop());
-        }
-
-        if (addedTeam) {
-            teams.pop()
-        }
-
-        return rounds;
-    }
+    
 
 
     return (
@@ -102,6 +70,7 @@ export function NewTournament() {
                                 id={'team' + { index }} 
                                 onChange={(e) => onTeamInputChange(index, e)} 
                                 placeholder={team.name}
+                                maxLength={25}
                                 />
                         ))}
                     </Input.Wrapper>
