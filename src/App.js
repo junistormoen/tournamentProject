@@ -43,14 +43,12 @@ export function App() {
 
     const auth = getAuth()
     const user = auth.currentUser
-    
-    if(user){
-      console.log("funnet")
+
+    if (user) {
       deleteUser(user).then(() => {
-      console.log("Bruker slettet")
-    }).catch((error) => {
-      console.log("Det skjedde en feil", error)
-    })
+      }).catch((error) => {
+        alert(error)
+      })
     }
   }
 

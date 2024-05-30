@@ -5,9 +5,9 @@ import tournamentService from './firebase/TournamentService';
 import gameService from './GameService';
 
 export function Games(props) {
-    const [tournamentStarted, setTournamentStarted] = useState(false)
+    const [hasTournamentStarted, setHasTournamentStarted] = useState(false)
     const [tournament, setTournament] = useState(null);
-    const [editTournament, setEditTournament] = useState(null)
+    const [editableTournament, setEditableTournament] = useState(null)
     const [rounds, setRounds] = useState([])
 
     const [selectedMatch, setSelectedMatch] = useState({});
@@ -18,15 +18,16 @@ export function Games(props) {
     const [addScoreModal, { open: openModal, close: closeModal }] = useDisclosure(false);
     const [editTeamsModal, { open: openEditor, close: closeEditor }] = useDisclosure(false);
 
-    const getTournamentInfo = useCallback(async () => {
-        const tournamentInfo = await tournamentService.getTournament(props.id);
-        setTournament(tournamentInfo);
-        setRounds(tournamentInfo.rounds);
-    }, [props.id]);
 
     useEffect(() => {
         getTournamentInfo();
-    }, [getTournamentInfo])
+    }, [])
+
+    const getTournamentInfo = async () => {
+        const tournamentInfo = await tournamentService.getTournament(props.id);
+        setTournament(tournamentInfo);
+        setRounds(tournamentInfo.rounds);
+    };
 
     function onMatchClick(match, roundIndex, matchIndex) {
         setSelectedMatch({ match, roundIndex, matchIndex })
@@ -43,7 +44,7 @@ export function Games(props) {
             const updatedTournament = await gameService.calculateResults(tournament, newResult, oldResult, selectedMatch.roundIndex, selectedMatch.matchIndex)
             await tournamentService.setResults(props.id, updatedTournament)
 
-            setTournamentStarted(true)
+            setHasTournamentStarted(true)
             setTeam1Result(null)
             setTeam2Result(null)
             setAlertText(false)
@@ -54,18 +55,20 @@ export function Games(props) {
 
     function onEditClick() {
         openEditor()
-        setEditTournament(tournament)
+        setEditableTournament(tournament)
     }
 
     function handleNameChange(oldName, newName) {
-        editTournament.teams.forEach((team) => {
+        let changeNameTournament = editableTournament
+
+        changeNameTournament.teams.forEach((team) => {
             if (team.name === oldName) {
                 team.name = newName
                 return;
             }
         })
 
-        editTournament.rounds.forEach((round) => {
+        changeNameTournament.rounds.forEach((round) => {
             round.matches.forEach((match) => {
                 if (match.team1 === oldName) {
                     match.team1 = newName
@@ -75,25 +78,25 @@ export function Games(props) {
             })
         })
 
-        setEditTournament(editTournament)
+        setEditableTournament(changeNameTournament)
     }
 
-    function onAddTeamClick(){
-        const newTeam = {name: "Lag " + (editTournament.teams.length + 1), score: 0}
-        editTournament.teams.push(newTeam)
-        const updatedRounds = gameService.generateRounds(editTournament.teams)
-        setEditTournament({...editTournament, rounds: updatedRounds})
+    function onAddTeamClick() {
+        const newTeam = { name: "Lag " + (editableTournament.teams.length + 1), score: 0 }
+        editableTournament.teams.push(newTeam)
+        const updatedRounds = gameService.generateRounds(editableTournament.teams)
+        setEditableTournament({ ...editableTournament, rounds: updatedRounds })
     }
 
     function onDeleteTeamClick(teamName) {
-        const updatedTeams = editTournament.teams.filter(team => team.name !== teamName);
+        const updatedTeams = editableTournament.teams.filter(team => team.name !== teamName);
         const updatedRounds = gameService.generateRounds(updatedTeams);
-        setEditTournament({ ...editTournament, teams: updatedTeams, rounds: updatedRounds, numberOfTeams: updatedTeams.length })
+        setEditableTournament({ ...editableTournament, teams: updatedTeams, rounds: updatedRounds, numberOfTeams: updatedTeams.length })
     }
 
-    function onSaveEditClick() {
+    async function onSaveEditClick() {
         closeEditor();
-        tournamentService.updateTeamNames(props.id, editTournament)
+        await tournamentService.updateTeamNames(props.id, editableTournament)
         getTournamentInfo()
     }
 
@@ -105,7 +108,7 @@ export function Games(props) {
                 </div>
 
                 <Tabs color="teal" variant="pills" defaultValue="tournament" radius="md" style={{ color: '#838584' }}>
-                    <Tabs.List style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                    <Tabs.List style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                         <Tabs.Tab value="tournament">
                             Kamper
                         </Tabs.Tab>
@@ -143,21 +146,21 @@ export function Games(props) {
                         <Modal opened={addScoreModal} onClose={closeModal} title="Legg til resultater">
                             {selectedMatch.match && (
                                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                    <p width='200px' style={{ margin: '0 10px'}}>{selectedMatch.match.team1}</p>
+                                    <p width='200px' style={{ margin: '0 10px' }}>{selectedMatch.match.team1}</p>
                                     <Input
                                         style={{ width: '50px', margin: '0 10px' }}
                                         placeholder={(selectedMatch.match.result) ? selectedMatch.match.result.team1 : "-"}
                                         type="number"
                                         onChange={(e) => setTeam1Result(e.target.value)}
                                     />
-                                    <p style={{ margin: '0 20px'}}> vs </p>
+                                    <p style={{ margin: '0 20px' }}> vs </p>
                                     <Input
                                         style={{ width: '50px', margin: '0 10px' }}
                                         placeholder={(selectedMatch.match.result) ? selectedMatch.match.result.team2 : "-"}
                                         type="number"
                                         onChange={(e) => setTeam2Result(e.target.value)}
                                     />
-                                    <p width='200px' style={{ margin: '0 10px'}}>{selectedMatch.match.team2}</p>
+                                    <p width='200px' style={{ margin: '0 10px' }}>{selectedMatch.match.team2}</p>
                                 </div>
                             )}
                             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
@@ -207,19 +210,19 @@ export function Games(props) {
                             Rediger
                         </Button>
                         <Modal opened={editTeamsModal} onClose={closeEditor} title="Rediger lagnavn" >
-                            {editTournament?.teams.map((team, index) => (
+                            {editableTournament?.teams.map((team, index) => (
                                 <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', justifyContent: 'center' }}>
                                     <Input
                                         placeholder={team.name}
                                         onChange={(e) => handleNameChange(team.name, e.target.value)}
                                         maxLength={25}
                                     />
-                                    {!tournamentStarted && <Button variant='transparent' color='gray' size='xs' onClick={() => onDeleteTeamClick(team.name)}>slett</Button>}
+                                    {!hasTournamentStarted && <Button variant='transparent' color='gray' size='xs' onClick={() => onDeleteTeamClick(team.name)}>slett</Button>}
                                 </div>
                             ))}
 
                             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-                                {tournamentStarted ?
+                                {hasTournamentStarted ?
                                     <Text size='xs' color='gray'>Kan ikke legge til eller slette lag</Text>
                                     :
                                     <Button variant='subtle' size='xs' onClick={() => onAddTeamClick()}>Legg til flere lag</Button>

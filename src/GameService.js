@@ -79,8 +79,6 @@ const gameService = {
                 }
             }
         });
-
-        console.log(tournament)
         
         return tournament
     }
