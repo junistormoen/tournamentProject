@@ -1,5 +1,5 @@
 import { auth, signInWithGooglePopup } from './firebase/firebaseConfig';
-import { Button, Image, Loader } from '@mantine/core';
+import { Button, Image } from '@mantine/core';
 import { App } from "./App.js";
 import { onAuthStateChanged } from 'firebase/auth';
 import React, { useEffect, useState } from 'react';

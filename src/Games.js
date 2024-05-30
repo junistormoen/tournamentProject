@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import { Table, Text, Button, Tabs, Modal, Input } from '@mantine/core';
 import tournamentService from './firebase/TournamentService';
@@ -18,11 +18,11 @@ export function Games(props) {
     const [addScoreModal, { open: openModal, close: closeModal }] = useDisclosure(false);
     const [editTeamsModal, { open: openEditor, close: closeEditor }] = useDisclosure(false);
 
-    const getTournamentInfo = async () => {
+    const getTournamentInfo = useCallback(async () => {
         const tournamentInfo = await tournamentService.getTournament(props.id);
         setTournament(tournamentInfo);
         setRounds(tournamentInfo.rounds);
-    };
+    }, [props.id]);
 
     useEffect(() => {
         getTournamentInfo();
@@ -36,7 +36,7 @@ export function Games(props) {
     async function onSaveResultsClick() {
         if (team1Result && team2Result) {
             closeModal()
-            
+
             const oldResult = selectedMatch.match.result || false;
             const newResult = { team1: team1Result, team2: team2Result };
 
@@ -94,6 +94,7 @@ export function Games(props) {
     function onSaveEditClick() {
         closeEditor();
         tournamentService.updateTeamNames(props.id, editTournament)
+        getTournamentInfo()
     }
 
     return (
