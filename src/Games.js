@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import { Table, Text, Button, Tabs, Modal, Input } from '@mantine/core';
 import tournamentService from './firebase/TournamentService';
