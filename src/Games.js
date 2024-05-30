@@ -18,7 +18,7 @@ export function Games(props) {
     const [addScoreModal, { open: openModal, close: closeModal }] = useDisclosure(false);
     const [editTeamsModal, { open: openEditor, close: closeEditor }] = useDisclosure(false);
 
-    const getTournamentInfo = useCallback(  async () => {
+    const getTournamentInfo = useCallback(async () => {
         const tournamentInfo = await tournamentService.getTournament(props.id);
         setTournament(tournamentInfo);
         setRounds(tournamentInfo.rounds);
@@ -60,18 +60,27 @@ export function Games(props) {
     function handleNameChange(oldName, newName) {
         let changeNameTournament = editableTournament
 
-        changeNameTournament.teams.forEach((team) => {
+        changeNameTournament.teams.forEach((team, index) => {
             if (team.name === oldName) {
+                if (newName === " ") {
+                    newName = "Lag " + (index + 1)
+                }
                 team.name = newName
                 return;
             }
         })
 
-        changeNameTournament.rounds.forEach((round) => {
+        changeNameTournament.rounds.forEach((round, index) => {
             round.matches.forEach((match) => {
                 if (match.team1 === oldName) {
+                    if (newName === " ") {
+                        newName = "Lag " + (index + 1)
+                    }
                     match.team1 = newName
                 } else if (match.team2 === oldName) {
+                    if (newName === " ") {
+                        newName = "Lag " + (index + 1)
+                    }
                     match.team2 = newName
                 }
             })
