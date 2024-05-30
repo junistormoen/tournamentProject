@@ -19,7 +19,7 @@ export function Start() {
 
     return (
         <>
-            {loginUser ? <App /> :
+            {loginUser ? <App/>:
                 <div className="App-container">
                     <Image src={logo} style={{height: 400, width: 400, paddingBottom: 50}}></Image>
                     <Button
