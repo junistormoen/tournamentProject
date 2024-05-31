@@ -31,10 +31,11 @@ export function Games(props) {
     function onMatchClick(match, roundIndex, matchIndex) {
         setSelectedMatch({ match, roundIndex, matchIndex })
         openModal()
+        setAlertText(false)
     }
 
     async function onSaveResultsClick() {
-        if (team1Result && team2Result) {
+        if ((team1Result !== null && team2Result !== null) && (team1Result !== "" && team2Result !== "")) {
             closeModal()
 
             const oldResult = selectedMatch.match.result || false;
@@ -43,7 +44,6 @@ export function Games(props) {
             const updatedTournament = await gameService.calculateResults(tournament, newResult, oldResult, selectedMatch.roundIndex, selectedMatch.matchIndex)
             await tournamentService.setResults(props.id, updatedTournament)
 
-            setHasTournamentStarted(true)
             setTeam1Result(null)
             setTeam2Result(null)
             setAlertText(false)
@@ -55,6 +55,12 @@ export function Games(props) {
     function onEditClick() {
         openEditor()
         setEditableTournament(tournament)
+
+        tournament.teams.forEach((team) => {
+            if (team.score > 0) {
+                setHasTournamentStarted(true)
+            }
+        })
     }
 
     function handleNameChange(oldName, newName) {

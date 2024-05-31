@@ -39,6 +39,11 @@ export function App() {
   }
 
   async function onDeleteUserClick() {
+    const confirmation = window.confirm("Er du sikker på at du vil slette brukeren?");
+    if (!confirmation) {
+      return;
+    }
+
     await signInWithGooglePopup()
 
     const auth = getAuth()
